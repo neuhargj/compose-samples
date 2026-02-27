@@ -4,6 +4,12 @@ on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # This tells GitHub to run all commands INSIDE the JetNews folder
+    defaults:
+      run:
+        working-directory: ./JetNews
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -16,16 +22,14 @@ jobs:
           cache: gradle
 
       - name: Make Gradle Executable
-        # This command finds the gradlew file wherever it is and makes it executable
-        run: find . -name "gradlew" -exec chmod +x {} +
+        run: chmod +x gradlew
 
-      - name: Build JetNews APK
-        # We run it from the root using the JetNews project path
-        run: ./gradlew :JetNews:assembleDebug
+      - name: Build Debug APK
+        # Note: We use :app:assembleDebug because we are already inside JetNews
+        run: ./gradlew :app:assembleDebug
 
-      - name: Upload JetNews APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JetNews-APK
-          # This wildcard path ensures it finds the APK even if folders change
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: JetNews-App-APK
+          path: JetNews/app/build/outputs/apk/debug/*.apk
