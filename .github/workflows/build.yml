@@ -1,13 +1,9 @@
 name: Build JetNews Sample
-on: 
-  push:
-    branches: [ main ]
-  workflow_dispatch: # This allows you to click "Run" manually from your iPhone
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -19,16 +15,17 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Grant Execute Permission
-        run: chmod +x gradlew
+      - name: Make Gradle Executable
+        # This command finds the gradlew file wherever it is and makes it executable
+        run: find . -name "gradlew" -exec chmod +x {} +
 
       - name: Build JetNews APK
-        # This command tells the root Gradle to specifically build the JetNews project
+        # We run it from the root using the JetNews project path
         run: ./gradlew :JetNews:assembleDebug
 
       - name: Upload JetNews APK
         uses: actions/upload-artifact@v4
         with:
-          name: JetNews-Debug-APK
-          # Path to the specific JetNews build output
-          path: JetNews/build/outputs/apk/debug/*.apk
+          name: JetNews-APK
+          # This wildcard path ensures it finds the APK even if folders change
+          path: "**/build/outputs/apk/debug/*.apk"
